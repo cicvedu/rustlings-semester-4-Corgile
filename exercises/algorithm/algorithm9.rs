@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,8 +36,23 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        // Step 1: Add the value to the end of the array.
+        self.items.push(value);
+        self.count += 1;
+        // Step 2: Bubble up to fix the heap property if it's violated.
+        let mut index = self.count;
+        let parent = self.parent_idx(index);
+        while index > 1 {
+            let parent = self.parent_idx(index);
+            if (self.comparator)(&self.items[index], &self.items[parent]) {
+                self.items.swap(index, parent);
+                index = parent;
+            } else {
+                break; // 如果当前节点不小于（或不大于，取决于堆类型）其父节点，则停止上浮
+            }
+        }
     }
+
 
     fn parent_idx(&self, idx: usize) -> usize {
         idx / 2
@@ -57,8 +71,18 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+
+        if right_idx > self.count {
+            left_idx // No right child, return left child
+        } else {
+            if (self.comparator)(&self.items[left_idx], &self.items[right_idx]) {
+                left_idx
+            } else {
+                right_idx
+            }
+        }
     }
 }
 
@@ -84,8 +108,25 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() { return None; }
+        // Step 1: Swap the first and last items
+        self.items.swap(1, self.count);
+        let result = self.items.pop(); // Remove the last item, which is the old root
+        self.count -= 1;
+
+        // Step 2: Bubble down from the root to fix the heap
+        let mut index = 1;
+        while self.children_present(index) {
+            let smallest_child_index = self.smallest_child_idx(index);
+            if (self.comparator)(&self.items[smallest_child_index], &self.items[index]) {
+                self.items.swap(index, smallest_child_index);
+                index = smallest_child_index;
+            } else {
+                break;
+            }
+        }
+
+        result
     }
 }
 
